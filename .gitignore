@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Pipeline run outputs (keep examples only)
+runs/
+.systematic-literature-review/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Local working notes (not for publishing)
+NEXT-SESSION.md
+
+# Private draft (not for publishing)
+AUTHOR_MESSAGE_DRAFT.md
