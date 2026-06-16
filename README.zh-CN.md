@@ -147,7 +147,7 @@ python3 scripts/build_outputs.py --scored .litriage/scored_papers.jsonl --topic 
 
 ---
 
-## 致谢与署名
+## 致谢
 
 核心的**检索 → 去重 → 1–10 相关性打分 → 高分优先选文**这一*思路*（第 1–4 阶段）
 **灵感来源于** Bensz Conan（[@huangwb8](https://github.com/huangwb8)）非常出色的
@@ -159,5 +159,4 @@ MeSH/研究类型/证据等级标注、评分进 Zotero 的衔接，以及刻意
 
 ## 许可证
 
-MIT © 2026 Qing Wang（[@heleninsights-dot](https://github.com/heleninsights-dot)）。
-详见 [LICENSE](./LICENSE)。
+MIT —— 详见 [LICENSE](LICENSE)。

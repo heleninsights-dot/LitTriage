@@ -6,8 +6,8 @@
 [![Zero dependencies](https://img.shields.io/badge/dependencies-none-brightgreen.svg)](#quick-start)
 [![中文版本](https://img.shields.io/badge/README-%E4%B8%AD%E6%96%87%E7%89%88-green)](README.zh-CN.md)
 
-> 像分诊病人一样分诊文献：先诊断 → 再排序 → 先读最重要、最贴近你需求的那几篇。
 > **Diagnose** your literature, **rank** it, and read what you most need to read **first**.
+> 像分诊病人一样分诊文献：先诊断 → 再排序 → 先读最重要、最贴近你需求的那几篇。
 
 A bite-sized Claude Code / Codex **skill** that **searches and triages**
 medical literature: it plans MeSH-aware PubMed queries, retrieves and
@@ -151,7 +151,7 @@ See `SKILL.md` for the full stage-by-stage contract and `references/` for the
 query-planning and scoring prompts.
 
 ---
-## Attribution
+## Acknowledgments
 The core **search → de-duplicate → 1–10 relevance score → high-score-first
 selection** *concept* (stages 1–4) is **inspired by** the excellent
 [`ChineseResearchLaTeX`](https://github.com/huangwb8/ChineseResearchLaTeX) skill by **Bensz Conan ([@huangwb8](https://github.com/huangwb8))**.
@@ -162,5 +162,4 @@ handoff, and the deliberate "no writing stage" design are original to LitTriage.
 
 ## License
 
-MIT © 2026 Qing Wang ([@heleninsights-dot](https://github.com/heleninsights-dot)).
-See [LICENSE](./LICENSE).
+MIT — see [LICENSE](LICENSE).
