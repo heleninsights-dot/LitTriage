@@ -9,18 +9,17 @@
 > **Diagnose** your literature, **rank** it, and read what you most need to read **first**.
 > 像分诊病人一样分诊文献：先诊断 → 再排序 → 先读最重要、最贴近你需求的那几篇。
 
----
-
-**You will never read every paper — and you were never meant to.**
-
-The real skill is judgment: *what to read first.* And that judgment isn't
-universal. What makes a paper matter most in *your* field is something only you
-can name — the assay, the model system, the clinical stage, the dataset.
-LitTriage turns that judgment into a scoring algorithm **you design**, then ranks
-your literature by it. So on day one you open the paper that matters — not page 7
-of PubMed.
-
-It's a tool you use — and a ranking algorithm you make your own.
+> [!IMPORTANT]
+> **You will never read every paper — and you were never meant to.**
+>
+> The real skill is judgment: *what to read first.* And that judgment isn't
+> universal. What makes a paper matter most in *your* field is something only you
+> can name — the assay, the model system, the clinical stage, the dataset.
+> LitTriage turns that judgment into a scoring algorithm **you design**, then ranks
+> your literature by it. So on day one you open the paper that matters — not page 7
+> of PubMed.
+>
+> It's a tool you use — and a ranking algorithm you make your own.
 
 ---
 
