@@ -86,13 +86,14 @@ them, or stop wherever you have what you need.
 
 ## What LitTriage gives you
 
-Two deliverables, then it gets out of the way:
+A small set of deliverables, then it gets out of the way:
 
 | File | What it is | What you do with it |
 | :--- | :--- | :--- |
 | `{topic}_ranked.rdf` | Zotero RDF: a parent collection with **one subcollection per theme** (reviews first), papers already filed inside. | Import once → real theme **subfolders** in Zotero. |
 | `{topic}_ranked.bib` | DOI-keyed BibTeX in theme order. Each entry's `keywords` carry `score-08, topic-…, type-rct, evidence-2, litriage`. | Import to Zotero for a flat collection — the keywords become **sortable tags**, so you read by `score-09 → score-08 → …`. |
 | `{topic}_ranked.md` | A triage note: a "How this was built" provenance funnel + score/evidence snapshot, then papers **grouped by subtopic** (reviews/meta-analyses first, then by best score) — score · evidence · year · first author · title · journal · DOI. | Eyeball it first to decide what's worth pulling the PDF for. |
+| `{topic}_ranked.html` *(optional)* | The same triage note as a **wide, landscape** page (built from the same scored records, so it never drifts from the `.md`). | Open full-width in a browser; **Print → Landscape** for a clean PDF to share. |
 
 **It does not write the review for you** — and that's the point. You (or your
 students) read the real manuscripts, ranked best-first, instead of trusting an
@@ -118,7 +119,8 @@ python3 scripts/pubmed_search.py --queries .litriage/queries.json --out .litriag
 python3 scripts/dedupe.py        --in .litriage/papers_pubmed.jsonl --out .litriage/candidates.jsonl
 # (the AI scores candidates -> .litriage/scored_papers.jsonl)
 python3 scripts/build_outputs.py --scored .litriage/scored_papers.jsonl --topic "my topic" \
-    --out-bib my-topic_ranked.bib --out-md my-topic_ranked.md --out-rdf my-topic_ranked.rdf
+    --out-bib my-topic_ranked.bib --out-md my-topic_ranked.md --out-rdf my-topic_ranked.rdf \
+    --out-html my-topic_ranked.html
 ```
 
 **Requirements:** Python 3.9+. That's it — no `pip install`, no LaTeX, no pandoc.
@@ -165,7 +167,7 @@ topic
   ④ score 1-10 + study-type tag          (AI → scored_papers.jsonl)
   ⑤ build deliverables                   (build_outputs.py)
         ↓
-  {topic}_ranked.rdf   +   {topic}_ranked.bib   +   {topic}_ranked.md
+  {topic}_ranked.rdf  +  {topic}_ranked.bib  +  {topic}_ranked.md  (+ .html view)
 ```
 
 See `SKILL.md` for the full stage-by-stage contract and `references/` for the

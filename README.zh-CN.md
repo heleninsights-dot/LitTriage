@@ -79,13 +79,14 @@ LitTriage 是整套流程的入口。下面每一步都是独立的工具 / skil
 
 ## LitTriage 给你什么
 
-两个产物，然后它就「让路」：
+若干产物，然后它就「让路」：
 
 | 文件 | 是什么 | 怎么用 |
 | :--- | :--- | :--- |
 | `{topic}_ranked.rdf` | Zotero RDF：一个父合集，下设**每个主题一个子合集**（综述置顶），文献已归入各自主题。 | 一次导入 → 在 Zotero 中得到真正的主题**子文件夹**。 |
 | `{topic}_ranked.bib` | 以 DOI 为 key、按主题排序的 BibTeX。每条的 `keywords` 里写入 `score-08, topic-…, type-rct, evidence-2, litriage`。 | 导入 Zotero 得到一个扁平合集——这些关键词会变成**可排序的标签**，于是你按 `score-09 → score-08 → …` 的顺序阅读。 |
 | `{topic}_ranked.md` | 一份分诊笔记：开头是「如何构建」检索漏斗（检索式 → 命中 → 去重 → 打分 → 保留）与评分/证据概览，正文**按子主题分组**（综述/荟萃分析置顶，其余按最高分排序）——评分 · 证据等级 · 年份 · 第一作者 · 标题 · 期刊 · DOI。 | 先扫一眼，决定哪些值得去拉全文 PDF。 |
+| `{topic}_ranked.html`（可选） | 与 `.md` 同一份分诊笔记的**宽屏横向**网页版（由同一批已打分文献生成，永远与 `.md` 一致）。 | 在浏览器中满宽打开；**打印 → 横向**即可导出一份便于分享的 PDF。 |
 
 **它不会替你写综述**——这正是设计初衷。你（或你的学生）去读真正的原文，按最相关优先
 排序，而不是依赖只看摘要的自动总结。
@@ -113,7 +114,8 @@ python3 scripts/pubmed_search.py --queries .litriage/queries.json --out .litriag
 python3 scripts/dedupe.py        --in .litriage/papers_pubmed.jsonl --out .litriage/candidates.jsonl
 # （由 AI 给候选文献打分 -> .litriage/scored_papers.jsonl）
 python3 scripts/build_outputs.py --scored .litriage/scored_papers.jsonl --topic "my topic" \
-    --out-bib my-topic_ranked.bib --out-md my-topic_ranked.md --out-rdf my-topic_ranked.rdf
+    --out-bib my-topic_ranked.bib --out-md my-topic_ranked.md --out-rdf my-topic_ranked.rdf \
+    --out-html my-topic_ranked.html
 ```
 
 **环境要求：** Python 3.9+。仅此而已——无需 `pip install`，无需 LaTeX，无需 pandoc。
@@ -157,7 +159,7 @@ python3 scripts/build_outputs.py --scored .litriage/scored_papers.jsonl --topic 
   ④ 打分 1-10 + 研究类型标注               (AI → scored_papers.jsonl)
   ⑤ 生成产物                               (build_outputs.py)
         ↓
-  {topic}_ranked.rdf   +   {topic}_ranked.bib   +   {topic}_ranked.md
+  {topic}_ranked.rdf  +  {topic}_ranked.bib  +  {topic}_ranked.md  (+ .html 视图)
 ```
 
 完整的逐阶段约定见 `SKILL.md`，检索式规划与打分的提示词见 `references/`。
