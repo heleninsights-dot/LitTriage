@@ -15,11 +15,13 @@ Outputs:
                           as TAGS, so after import you sort Zotero by the
                           `score-08`-style tag and read top-down.
     {topic}_ranked.md   — human-readable triage table.
+    {topic}_ranked.html — optional wide, landscape view of the note (opens
+                          full-width in a browser; Print → Landscape for a PDF).
 
 Usage:
     python3 scripts/build_outputs.py --scored scored_papers.jsonl \
         --topic "tPBM in Alzheimer's" --out-bib out.bib --out-md out.md \
-        [--min-score 0]
+        [--out-rdf out.rdf] [--out-html out.html] [--min-score 0]
 """
 
 from __future__ import annotations
@@ -413,6 +415,149 @@ def build_md(
 
 
 # --------------------------------------------------------------------------- #
+# Landscape HTML view — a wide, shareable rendering of the triage note          #
+# --------------------------------------------------------------------------- #
+
+# A self-contained page: opens full-width in any browser and, via the @page
+# rule, prints straight to a landscape PDF. It is just a *view* of the same
+# triage note — no new content, no binary PDF/Word is written by the skill.
+_HTML_CSS = """
+@page { size: A4 landscape; margin: 12mm; }
+* { box-sizing: border-box; }
+body { font: 13px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+       color:#1a1a1a; margin:0 auto; padding:24px 32px; max-width:1600px; background:#fff; }
+h1 { font-size:24px; margin:.2em 0 .3em; }
+h2 { font-size:19px; margin:1.4em 0 .5em; border-bottom:2px solid #eee; padding-bottom:4px; }
+h3 { font-size:15px; margin:1.3em 0 .4em; color:#1769aa; }
+p.meta { color:#666; margin:.2em 0 1em; }
+p.foot { color:#444; }
+hr { border:0; border-top:1px solid #ddd; margin:1.5em 0; }
+.callout { border-left:4px solid #999; background:#f7f7f8; border-radius:4px;
+           padding:10px 14px; margin:10px 0; }
+.callout .ct { font-weight:700; margin-bottom:4px; }
+.callout.info { border-color:#1769aa; background:#eef5fb; }
+.callout.tip  { border-color:#2e9e5b; background:#edf8f1; }
+.callout.warn { border-color:#e0a800; background:#fdf7e6; }
+table { width:100%; border-collapse:collapse; margin:.4em 0 1.2em; font-size:12px; table-layout:fixed; }
+th,td { border:1px solid #e2e2e2; padding:5px 8px; text-align:left; vertical-align:top;
+        word-wrap:break-word; overflow-wrap:anywhere; }
+thead th { background:#1769aa; color:#fff; }
+tbody tr:nth-child(even){ background:#fafbfc; }
+td.sc { text-align:center; font-weight:700; }
+td.yr { text-align:center; }
+th:nth-child(1),td:nth-child(1){ width:46px; }
+th:nth-child(2),td:nth-child(2){ width:128px; }
+th:nth-child(3),td:nth-child(3){ width:46px; }
+th:nth-child(4),td:nth-child(4){ width:150px; }
+th:nth-child(6),td:nth-child(6){ width:200px; }
+th:nth-child(7),td:nth-child(7){ width:230px; }
+td a { color:#1769aa; text-decoration:none; word-break:break-all; }
+code { background:#eceef0; padding:1px 5px; border-radius:3px; font-size:.92em; }
+"""
+
+
+def _he(text) -> str:
+    """Escape text for HTML element content."""
+    return _xml_escape("" if text is None else str(text))
+
+
+def build_html(
+    records: List[Dict],
+    topic: str,
+    *,
+    all_scored: List[Dict],
+    funnel: Dict[str, Optional[int]],
+    min_score: float,
+    bib_name: Optional[str] = None,
+    headline: Optional[str] = None,
+) -> str:
+    """Render the triage note as a wide, landscape-oriented HTML page.
+
+    Built from the SAME scored records and `order_themes` ordering as the .md,
+    so the two deliverables never drift apart."""
+    n_kept = len(records)
+    n_scored = len(all_scored)
+    scores = [_score_of(r) for r in all_scored]
+    high = sum(1 for x in scores if x >= 7)
+    mid = sum(1 for x in scores if 5 <= x < 7)
+    low = sum(1 for x in scores if x < 5)
+    sources = summarize_sources(all_scored)
+
+    evidence = Counter()
+    for rec in records:
+        _, level = classify_study(rec)
+        evidence[EVIDENCE_LABEL.get(level, "?")] += 1
+    ev_str = " · ".join(f"{label}: {n}" for label, n in evidence.most_common())
+
+    funnel_bits = []
+    if funnel.get("queries") is not None:
+        funnel_bits.append(f"{funnel['queries']} queries")
+    if funnel.get("hits") is not None:
+        funnel_bits.append(f"{funnel['hits']} hits")
+    if funnel.get("deduped") is not None:
+        funnel_bits.append(f"{funnel['deduped']} deduped")
+    if funnel.get("deduped") != n_scored:
+        funnel_bits.append(f"{n_scored} scored")
+    funnel_bits.append(f"<strong>{n_kept} kept</strong> (score &ge; {min_score:g})")
+
+    P: List[str] = []
+    P.append(f"<h1>LitTriage — {_he(topic)}</h1>")
+    P.append(f"<p class='meta'>{date.today().isoformat()} · Source: {_he(sources)} · "
+             "tags: literature-triage, litriage</p>")
+
+    bib_line = f" · BibTeX: <code>{_he(bib_name)}</code>" if bib_name else ""
+    P.append("<div class='callout info'><div class='ct'>How this was built</div>"
+             f"<div class='cb'>{' → '.join(funnel_bits)}.<br>"
+             f"Source: {_he(sources)}. Scores (1–10) are <strong>abstract-based triage</strong>, "
+             f"not full-text judgement.{bib_line}</div></div>")
+
+    P.append("<div class='callout tip'><div class='ct'>Snapshot</div>"
+             f"<div class='cb'>Scored {n_scored} — High (≥7): {high} · Mid (5–6.9): {mid} · "
+             f"Low (&lt;5): {low}. Kept {n_kept}.<br>"
+             f"Evidence (kept): {_he(ev_str) or '—'}.</div></div>")
+
+    if headline:
+        P.append("<div class='callout warn'><div class='ct'>Headline</div>"
+                 f"<div class='cb'>{_he(headline.strip())}</div></div>")
+
+    P.append("<h2>By theme</h2>")
+    for idx, (subtopic, items) in enumerate(order_themes(records), 1):
+        top = max(_score_of(r) for r in items)
+        P.append(f"<h3>{idx}. {_he(subtopic)} · {len(items)} papers · top {top:.1f}</h3>")
+        P.append("<table><thead><tr>"
+                 "<th>Score</th><th>Evidence</th><th>Year</th><th>First author</th>"
+                 "<th>Title</th><th>Journal</th><th>DOI</th></tr></thead><tbody>")
+        for rec in items:
+            _, level = classify_study(rec)
+            score = rec.get("score")
+            score_s = f"{score:.1f}" if isinstance(score, (int, float)) else "-"
+            doi = rec.get("doi") or ""
+            doi_cell = (f"<a href='https://doi.org/{_he(doi)}'>{_he(doi)}</a>"
+                        if doi else "—")
+            P.append(
+                "<tr>"
+                f"<td class='sc'>{score_s}</td>"
+                f"<td>{_he(EVIDENCE_LABEL.get(level, '?'))}</td>"
+                f"<td class='yr'>{_he(rec.get('year') or '—')}</td>"
+                f"<td>{_he(first_author_display(rec))}</td>"
+                f"<td>{_he(rec.get('title') or '')}</td>"
+                f"<td>{_he(rec.get('journal') or '—')}</td>"
+                f"<td class='doi'>{doi_cell}</td>"
+                "</tr>")
+        P.append("</tbody></table>")
+
+    P.append("<hr><p class='foot'><em>Next: import the <code>.rdf</code> into Zotero "
+             "(creates a subcollection per theme) or the <code>.bib</code> (single collection + "
+             "tags) → Find Available PDF → run <code>zotero-deepread-bridge</code> → "
+             "<code>phd-deepread</code> on the highest-score papers first.</em></p>")
+
+    return ("<!doctype html><html lang='en'><head><meta charset='utf-8'>"
+            "<meta name='viewport' content='width=device-width, initial-scale=1'>"
+            f"<title>LitTriage — {_he(topic)}</title><style>{_HTML_CSS}</style></head>"
+            f"<body>{''.join(P)}</body></html>\n")
+
+
+# --------------------------------------------------------------------------- #
 # Zotero RDF — one import, a real subcollection per theme                       #
 # --------------------------------------------------------------------------- #
 
@@ -526,6 +671,9 @@ def main() -> int:
     ap.add_argument("--out-rdf", default=None,
                     help="optional Zotero RDF with one subcollection per theme "
                          "(import this for real theme subfolders)")
+    ap.add_argument("--out-html", default=None,
+                    help="optional wide, landscape-oriented HTML view of the note "
+                         "(opens full-width in a browser; Print → Landscape for a PDF)")
     ap.add_argument("--min-score", type=float, default=0.0,
                     help="drop papers below this score from the deliverables")
     ap.add_argument("--headline", default=None,
@@ -557,6 +705,11 @@ def main() -> int:
         with open(args.out_rdf, "w", encoding="utf-8") as fh:
             fh.write(build_rdf(themed_groups, args.topic))
         wrote.append(args.out_rdf)
+    if args.out_html:
+        with open(args.out_html, "w", encoding="utf-8") as fh:
+            fh.write(build_html(records, args.topic, all_scored=all_scored, funnel=funnel,
+                                min_score=args.min_score, bib_name=bib_name, headline=args.headline))
+        wrote.append(args.out_html)
 
     eprint(f"Wrote {len(records)} entries -> {', '.join(wrote)}")
     return 0

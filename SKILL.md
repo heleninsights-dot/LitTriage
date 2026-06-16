@@ -4,7 +4,7 @@ description: Use when the user wants to SEARCH and TRIAGE medical/scientific lit
 metadata:
   author: Qing Wang (@heleninsights-dot)
   attribution: "Stages 1-4 concept (query-variant search → dedup → 1-10 relevance scoring → high-score-first selection) inspired by research-literature-review by Bensz Conan (@huangwb8). Independent reimplementation; no source copied. PubMed-first retrieval, study-type/evidence tagging, and the Zotero handoff are new."
-  version: 0.1.0
+  version: 0.2.0
   keywords:
     - litriage
     - 文献分诊
@@ -47,7 +47,7 @@ metadata:
 - Optional NCBI API key (faster; not required).
 - Output directory (default `runs/{safe_topic}/`).
 
-## Outputs (3 deliverables, then stop)
+## Outputs (4 deliverables, then stop)
 
 - `{topic}_ranked.bib` — DOI-keyed BibTeX in theme order (reviews first, then by
   score). Each entry's `keywords` carries
@@ -61,6 +61,10 @@ metadata:
   papers **grouped by subtopic** (reviews/meta-analyses first, then by best
   score) in tables of
   score · evidence · year · first author · title · journal · DOI.
+- `{topic}_ranked.html` — the same triage note as a **wide, landscape** page:
+  opens full-width in a browser and (via an `@page` rule) prints straight to a
+  landscape PDF. It is a *view* of the `.md` built from the same scored records,
+  not new content — see the constraint below.
 
 Intermediate files (under `{work_dir}/.litriage/`):
 `queries.json`, `papers_pubmed.jsonl`, `papers_openalex.jsonl` (if used),
@@ -102,11 +106,13 @@ Read `references/02_scoring.md`. The AI reads each candidate's title + abstract
 ```bash
 python3 scripts/build_outputs.py --scored .litriage/scored_papers.jsonl \
     --topic "{topic}" --out-bib "{topic}_ranked.bib" --out-md "{topic}_ranked.md" \
-    --out-rdf "{topic}_ranked.rdf" \
+    --out-rdf "{topic}_ranked.rdf" --out-html "{topic}_ranked.html" \
     [--min-score 4] [--headline "one-line synthesis / research-gap insight"]
 ```
 `--out-rdf` writes a Zotero RDF with one subcollection per theme (import it for
-real theme subfolders). `--headline` is optional: pass a single AI-written
+real theme subfolders). `--out-html` writes a wide, landscape-oriented HTML view
+of the note (full-width in a browser; Print → Landscape for a PDF); omit it if
+the `.md` is enough. `--headline` is optional: pass a single AI-written
 sentence (e.g. the key gap or takeaway) to fill the note's Headline callout;
 omit it to leave the callout out. The funnel counts are read automatically from
 the sibling `.litriage/` files.
@@ -119,8 +125,11 @@ Available PDF* → read by `score-NN` tag → `zotero-deepread-bridge` →
 
 ## Hard constraints
 
-- LitTriage **never writes review prose** and **never produces PDF/Word**. It
-  stops at `.bib` + `.md`.
+- LitTriage **never writes review prose** and **never emits a PDF/Word binary**.
+  It stops at the citation set (`.bib`/`.rdf`) + the triage note (`.md`). The
+  optional `.html` is a landscape *view* of that same note — no new content —
+  which you can Print → Landscape to a PDF yourself; the skill never writes the
+  binary.
 - Scores come from title/abstract/MeSH only; the body must not claim full-text
   reading.
 - `keywords` in the `.bib` must keep the `score-NN` zero-padded so Zotero sorts
