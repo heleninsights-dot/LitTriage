@@ -126,12 +126,19 @@ python3 scripts/build_outputs.py --scored .litriage/scored_papers.jsonl --topic 
 
 ---
 
-> **Design note — scoring across fields.** The bones of a good ranking algorithm
-> transfer across fields; the dimensions don't. For translational science,
-> capture the **assay technology** under "method," make **model system** its own
-> axis, and let **clinical maturity raise the score** — a biomarker already in
-> the clinic shouldn't lose to one that's only ever been in a dish.
-> See [`references/02_scoring_translational.md`](references/02_scoring_translational.md).
+> **Design note — make the scoring your own.** Here's the idea worth borrowing,
+> whatever your field: the *bones* of a good ranking algorithm carry across every
+> discipline — but the *dimensions* you rank on are yours to choose. LitTriage
+> happens to score on clinical evidence, yet that's only one recipe. In
+> translational science, for example, you'd put **assay technology** under
+> "method," give **model system** its own axis, and let **clinical maturity raise
+> the score** — a biomarker already in the clinic shouldn't lose to one that has
+> only ever lived in a dish. Every field has its own quiet sense of *"what makes a
+> paper worth reading first"*; name those few axes, and the same machinery ranks
+> your literature your way.
+> See [`references/02_scoring_translational.md`](references/02_scoring_translational.md) for a worked example you can copy and adapt.
+>
+> 🎓 **If you want to design the scoring algorithm for your own research field, start right here.**
 
 ---
 
